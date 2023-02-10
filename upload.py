@@ -118,7 +118,7 @@ def get_all_video(_config):
 def download_video(url, out, format):
     try:
         msg = subprocess.check_output(
-            ["yt-dlp", url, "-f", format, "-o", out], stderr=subprocess.STDOUT)
+            ["yt-dlp", url, "-f", format, "-o", out, "--merge-output-format webm"], stderr=subprocess.STDOUT)
         logging.debug(msg[-512:])
         logging.info(f"视频下载完毕，大小：{get_file_size(out)} MB")
         return True
@@ -194,20 +194,23 @@ def upload_video(video_file, cover_file, _config, detail):
 
 def process_one(detail, config):
     logging.info(f'开始：{detail["vid"]}')
-    format = ["webm", "flv", "mp4"]
-    v_ext = None
-    for ext in format:
-        if download_video(detail["origin"], detail["vid"] + f".{ext}", f"{ext}"):
-            v_ext = ext
-            logging.info(f"使用格式：{ext}")
-            break
-    if v_ext is None:
-        logging.error("无合适格式")
-        return False
+    download_video(detail["origin"], detail["vid"] + "best/bestvideo+bestaudio")
+    # format = ["webm", "flv", "mp4"]
+    # v_ext = None
+    # for ext in format:
+    #     if download_video(detail["origin"], detail["vid"] + f".{ext}", f"{ext}"):
+    #         v_ext = ext
+    #         logging.info(f"使用格式：{ext}")
+    #         break
+    # if v_ext is None:
+    #     logging.error("无合适格式")
+    #     return False
     download_cover(detail["cover_url"], detail["vid"] + ".jpg")
-    ret = upload_video(detail["vid"] + f".{v_ext}",
+    # ret = upload_video(detail["vid"] + f".{v_ext}",
+    ret = upload_video(detail["vid"] + ".webm",
                        detail["vid"] + ".jpg", config, detail)
-    os.remove(detail["vid"] + f".{v_ext}")
+    # os.remove(detail["vid"] + f".{v_ext}")
+    os.remove(detail["vid"] + ".webm")
     os.remove(detail["vid"] + ".jpg")
     return ret
 
